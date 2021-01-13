@@ -232,11 +232,11 @@ resource "aws_cloudwatch_event_rule" "default" {
 resource "aws_cloudwatch_event_target" "default" {
   count  = var.enabled && length(var.schedule_expression) > 0 ? 1 : 0
   arn       = var.ecs_cluster_arn
-  rule      = aws_cloudwatch_event_rule.default.name
-  target_id = aws_cloudwatch_event_rule.default.name
+  rule      = aws_cloudwatch_event_rule.default.*.name
+  target_id = aws_cloudwatch_event_rule.default.*.name
   role_arn  = null
 
   ecs_target {
-    task_definition_arn = aws_ecs_task_definition.default.arn
+    task_definition_arn = aws_ecs_task_definition.default.*.arn
   }
 }
