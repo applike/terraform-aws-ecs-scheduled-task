@@ -224,17 +224,17 @@ resource "aws_iam_role_policy" "ecs_exec" {
 }
 
 resource "aws_cloudwatch_event_rule" "default" {
-  count  = var.enabled && length(var.schedule_expression) > 0 ? 1 : 0
+  count               = var.enabled && length(var.schedule_expression) > 0 ? 1 : 0
   name                = module.default_label.id
   schedule_expression = var.schedule_expression
 }
 
 resource "aws_cloudwatch_event_target" "default" {
-  count  = var.enabled && length(var.schedule_expression) > 0 ? 1 : 0
+  count     = var.enabled && length(var.schedule_expression) > 0 ? 1 : 0
   arn       = var.ecs_cluster_arn
   rule      = join("", aws_cloudwatch_event_rule.default.*.name)
   target_id = join("", aws_cloudwatch_event_rule.default.*.name)
-  role_arn  = null
+  role_arn  = var.cloudwatch_event_role_arn
 
   ecs_target {
     task_definition_arn = join("", aws_ecs_task_definition.default.*.arn)
