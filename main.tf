@@ -1,6 +1,6 @@
 module "default_label" {
   source      = "applike/label/aws"
-  version     = "1.0.1"
+  version     = "1.0.2"
   enabled     = var.enabled
   attributes  = var.attributes
   delimiter   = var.delimiter
@@ -13,7 +13,7 @@ module "default_label" {
 
 module "task_label" {
   source     = "applike/label/aws"
-  version    = "1.0.1"
+  version    = "1.0.2"
   enabled    = var.enabled && length(var.task_role_arn) == 0
   context    = module.default_label.context
   attributes = compact(concat(var.attributes, ["task"]))
@@ -21,7 +21,7 @@ module "task_label" {
 
 module "service_label" {
   source     = "applike/label/aws"
-  version    = "1.0.1"
+  version    = "1.0.2"
   enabled    = var.enabled
   context    = module.default_label.context
   attributes = compact(concat(var.attributes, ["service"]))
@@ -29,7 +29,7 @@ module "service_label" {
 
 module "exec_label" {
   source     = "applike/label/aws"
-  version    = "1.0.1"
+  version    = "1.0.2"
   enabled    = var.enabled && length(var.task_exec_role_arn) == 0
   context    = module.default_label.context
   attributes = compact(concat(var.attributes, ["exec"]))

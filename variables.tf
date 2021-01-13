@@ -150,12 +150,12 @@ variable "use_old_arn" {
 
 variable "schedule_expression" {
   type        = string
-  default     = null
+  default     = ""
   description = "The scheduling expression. For example, cron(0 20 * * ? *) or rate(5 minutes). At least one of schedule_expression or event_pattern is required. Can only be used on the default event bus."
 }
 
 variable "cloudwatch_event_role_arn" {
   type        = string
-  default     = null
+  default     = ""
   description = "The Amazon Resource Name (ARN) of the IAM role to be used for this target when the rule is triggered."
 }
