@@ -227,6 +227,7 @@ resource "aws_cloudwatch_event_rule" "default" {
   count               = var.enabled && length(var.schedule_expression) > 0 ? 1 : 0
   name                = module.default_label.id
   schedule_expression = var.schedule_expression
+  is_enabled          = var.is_enabled
 }
 
 resource "aws_cloudwatch_event_target" "default" {
@@ -237,6 +238,7 @@ resource "aws_cloudwatch_event_target" "default" {
   role_arn  = var.cloudwatch_event_role_arn
 
   ecs_target {
+    task_count          = var.task_count
     task_definition_arn = join("", aws_ecs_task_definition.default.*.arn)
   }
 }

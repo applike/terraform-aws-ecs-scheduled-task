@@ -159,3 +159,15 @@ variable "cloudwatch_event_role_arn" {
   default     = ""
   description = "The Amazon Resource Name (ARN) of the IAM role to be used for this target when the rule is triggered."
 }
+
+variable "is_enabled" {
+  type        = bool
+  description = "Whether the rule should be enabled."
+  default     = true
+}
+
+variable "task_count" {
+  type        = number
+  description = "The number of tasks to create based on the TaskDefinition."
+  default     = null
+}
