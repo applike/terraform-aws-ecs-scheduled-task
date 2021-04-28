@@ -293,14 +293,14 @@ resource "aws_security_group_rule" "allow_icmp_ingress" {
 }
 
 resource "aws_cloudwatch_event_rule" "default" {
-  count               = var.enabled && length(var.schedule_expression) > 0 ? 1 : 0
+  count               = local.enabled && length(var.schedule_expression) > 0 ? 1 : 0
   name                = module.this.id
   schedule_expression = var.schedule_expression
   is_enabled          = var.is_enabled
 }
 
 resource "aws_cloudwatch_event_target" "default" {
-  count     = var.enabled && length(var.schedule_expression) > 0 ? 1 : 0
+  count     = local.enabled && length(var.schedule_expression) > 0 ? 1 : 0
   arn       = var.ecs_cluster_arn
   rule      = join("", aws_cloudwatch_event_rule.default.*.name)
   target_id = join("", aws_cloudwatch_event_rule.default.*.name)
