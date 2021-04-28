@@ -1,4 +1,3 @@
----
 name: release
 on:
   push:
@@ -6,12 +5,14 @@ on:
       - master
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@master
+
       - name: Semantic Releaser
-        uses: jossef/action-semantic-releaser@v1
+        uses: jossef/action-semantic-releaser@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

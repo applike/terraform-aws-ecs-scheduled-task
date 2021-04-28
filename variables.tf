@@ -1,48 +1,7 @@
-variable "enabled" {
-  type        = bool
-  description = "Set to false to prevent the module from creating any resources"
-  default     = true
-}
-
-variable "project" {
+variable "vpc_id" {
   type        = string
-  description = "Project (e.g. `eg` or `cp`)"
+  description = "The VPC ID where resources are created"
   default     = ""
-}
-
-variable "environment" {
-  type        = string
-  description = "Environment, e.g. 'prod', 'staging', 'dev', 'pre-prod', 'UAT'"
-  default     = ""
-}
-
-variable "family" {
-  type        = string
-  description = "Family (e.g. `prod`, `dev`, `staging`)"
-  default     = ""
-}
-
-variable "application" {
-  type        = string
-  description = "Name of the application"
-}
-
-variable "delimiter" {
-  type        = string
-  default     = "-"
-  description = "Delimiter between `namespace`, `stage`, `name` and `attributes`"
-}
-
-variable "attributes" {
-  type        = list(string)
-  description = "Additional attributes (_e.g._ \"1\")"
-  default     = []
-}
-
-variable "tags" {
-  type        = map(string)
-  description = "Additional tags (_e.g._ { BusinessUnit : ABC })"
-  default     = {}
 }
 
 variable "ecs_cluster_arn" {
@@ -52,7 +11,19 @@ variable "ecs_cluster_arn" {
 
 variable "container_definition_json" {
   type        = string
-  description = "A string containing a JSON-encoded array of container definitions (`\"[{ \"name\": \"container1\", ... }, { \"name\": \"container2\", ... }]\"`). See https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html, https://github.com/cloudposse/terraform-aws-ecs-container-definition, or https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition#container_definitions"
+  description = <<-EOT
+    A string containing a JSON-encoded array of container definitions
+    (`"[{ "name": "container1", ... }, { "name": "container2", ... }]"`).
+    See [API_ContainerDefinition](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html),
+    [cloudposse/terraform-aws-ecs-container-definition](https://github.com/cloudposse/terraform-aws-ecs-container-definition), or
+    [ecs_task_definition#container_definitions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition#container_definitions)
+    EOT
+}
+
+variable "enable_all_egress_rule" {
+  type        = bool
+  description = "A flag to enable/disable adding the all ports egress rule to the ECS security group"
+  default     = false
 }
 
 variable "launch_type" {
@@ -66,14 +37,17 @@ variable "task_placement_constraints" {
     type       = string
     expression = string
   }))
-  description = "A set of placement constraints rules that are taken into consideration during task placement. Maximum number of placement_constraints is 10. See `placement_constraints` docs https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html#placement-constraints-arguments"
   default     = []
+  description = <<-EOT
+    A set of placement constraints rules that are taken into consideration during task placement.
+    Maximum number of placement_constraints is 10. See [`placement_constraints`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition#placement-constraints-arguments)
+    EOT
 }
 
 variable "network_mode" {
   type        = string
-  description = "The network mode to use for the task. This is required to be `awsvpc` for `FARGATE` `launch_type`"
-  default     = "bridge"
+  description = "The network mode to use for the task. This is required to be `awsvpc` for `FARGATE` `launch_type` or `null` for `EC2` `launch_type`"
+  default     = null
 }
 
 variable "task_cpu" {
@@ -94,10 +68,28 @@ variable "task_exec_role_arn" {
   default     = ""
 }
 
+variable "task_exec_policy_arns" {
+  type        = list(string)
+  description = "A list of IAM Policy ARNs to attach to the generated task execution role."
+  default     = []
+}
+
 variable "task_role_arn" {
   type        = string
   description = "The ARN of IAM role that allows your Amazon ECS container task to make calls to other AWS services"
   default     = ""
+}
+
+variable "task_policy_arns" {
+  type        = list(string)
+  description = "A list of IAM Policy ARNs to attach to the generated task role."
+  default     = []
+}
+
+variable "service_role_arn" {
+  type        = string
+  description = "ARN of the IAM role that allows Amazon ECS to make calls to your load balancer on your behalf. This parameter is required if you are using a load balancer with your service, but only if your task definition does not use the awsvpc network mode. If using awsvpc network mode, do not specify this role. If your account has already created the Amazon ECS service-linked role, that role is used by default for your service unless you specify a role here."
+  default     = null
 }
 
 variable "volumes" {
@@ -136,6 +128,12 @@ variable "proxy_configuration" {
   default     = null
 }
 
+variable "enable_icmp_rule" {
+  type        = bool
+  description = "Specifies whether to enable ICMP on the security group"
+  default     = false
+}
+
 variable "permissions_boundary" {
   type        = string
   description = "A permissions boundary ARN to apply to the 3 roles that are created."
@@ -145,6 +143,24 @@ variable "permissions_boundary" {
 variable "use_old_arn" {
   type        = bool
   description = "A flag to enable/disable tagging the ecs resources that require the new arn format"
+  default     = false
+}
+
+variable "task_definition" {
+  type        = string
+  description = "Reuse an existing task definition family and revision for the ecs service instead of creating one"
+  default     = null
+}
+
+variable "exec_enabled" {
+  type        = bool
+  description = "Specifies whether to enable Amazon ECS Exec for the tasks within the service"
+  default     = false
+}
+
+variable "enable_ecs_service_role" {
+  type        = bool
+  description = "Specifies whether to enable Amazon ECS service role"
   default     = false
 }
 
