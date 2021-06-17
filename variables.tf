@@ -1,7 +1,7 @@
 variable "vpc_id" {
   type        = string
   description = "The VPC ID where resources are created"
-  default     = ""
+  default     = null
 }
 
 variable "ecs_cluster_arn" {
@@ -20,10 +20,49 @@ variable "container_definition_json" {
     EOT
 }
 
-variable "enable_all_egress_rule" {
+variable "security_group_enabled" {
   type        = bool
-  description = "A flag to enable/disable adding the all ports egress rule to the ECS security group"
+  description = "Whether to create default Security Group for ECS service."
   default     = false
+}
+
+variable "security_group_description" {
+  type        = string
+  default     = "ECS service Security Group"
+  description = "The Security Group description."
+}
+
+variable "security_group_use_name_prefix" {
+  type        = bool
+  default     = false
+  description = "Whether to create a default Security Group with unique name beginning with the normalized prefix."
+}
+
+variable "security_group_rules" {
+  type = list(any)
+  default = [
+    {
+      type        = "egress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = -1
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all outbound traffic"
+    },
+    {
+      type        = "ingress"
+      from_port   = 8
+      to_port     = 0
+      protocol    = "icmp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Enables ping command from anywhere, see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-rules-reference.html#sg-rules-ping"
+    }
+  ]
+  description = <<-EOT
+    A list of maps of Security Group rules.
+    The values of map is fully complated with `aws_security_group_rule` resource.
+    To get more info see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule .
+  EOT
 }
 
 variable "launch_type" {
@@ -128,12 +167,6 @@ variable "proxy_configuration" {
   default     = null
 }
 
-variable "enable_icmp_rule" {
-  type        = bool
-  description = "Specifies whether to enable ICMP on the security group"
-  default     = false
-}
-
 variable "permissions_boundary" {
   type        = string
   description = "A permissions boundary ARN to apply to the 3 roles that are created."
@@ -158,7 +191,7 @@ variable "exec_enabled" {
   default     = false
 }
 
-variable "enable_ecs_service_role" {
+variable "ecs_service_role_enabled" {
   type        = bool
   description = "Specifies whether to enable Amazon ECS service role"
   default     = false
