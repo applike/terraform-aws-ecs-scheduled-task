@@ -1,6 +1,7 @@
 locals {
   enabled                 = module.this.enabled
-  enable_ecs_service_role = module.this.enabled && var.network_mode != "awsvpc" && var.enable_ecs_service_role
+  enable_ecs_service_role = module.this.enabled && var.ecs_service_role_enabled && var.network_mode != "awsvpc"
+  security_group_enabled  = module.this.enabled && var.security_group_enabled && var.network_mode == "awsvpc"
 }
 
 module "task_label" {
@@ -258,38 +259,22 @@ resource "aws_iam_role_policy_attachment" "ecs_exec" {
 
 # Service
 ## Security Groups
-resource "aws_security_group" "ecs_service" {
-  count       = local.enabled && var.network_mode == "awsvpc" ? 1 : 0
-  vpc_id      = var.vpc_id
-  name        = module.service_label.id
-  description = "Allow ALL egress from ECS service"
-  tags        = module.service_label.tags
+module "security_group" {
+  source  = "cloudposse/security-group/aws"
+  version = "0.3.1"
 
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+  use_name_prefix = var.security_group_use_name_prefix
+  rules           = var.security_group_rules
+  description     = var.security_group_description
+  vpc_id          = var.vpc_id
 
-resource "aws_security_group_rule" "allow_all_egress" {
-  count             = local.enabled && var.enable_all_egress_rule ? 1 : 0
-  description       = "Enables all egress from anywhere"
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = join("", aws_security_group.ecs_service.*.id)
-}
+  enabled = local.security_group_enabled
+  context = module.service_label.context
 
-resource "aws_security_group_rule" "allow_icmp_ingress" {
-  count             = local.enabled && var.enable_icmp_rule ? 1 : 0
-  description       = "Enables ping command from anywhere, see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-rules-reference.html#sg-rules-ping"
-  type              = "ingress"
-  from_port         = 8
-  to_port           = 0
-  protocol          = "icmp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = join("", aws_security_group.ecs_service.*.id)
+  namespace   = module.service_label.project
+  environment = module.service_label.environment
+  stage       = module.service_label.family
+  name        = module.service_label.application
 }
 
 resource "aws_cloudwatch_event_rule" "default" {

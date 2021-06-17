@@ -8,16 +8,6 @@ output "ecs_exec_role_policy_name" {
   value       = join("", aws_iam_role_policy.ecs_exec.*.name)
 }
 
-output "service_name" {
-  description = "ECS Service name"
-  value       = join("", aws_cloudwatch_event_rule.default.*.name)
-}
-
-output "service_arn" {
-  description = "ECS Service ARN"
-  value       = join("", aws_cloudwatch_event_rule.default.*.id)
-}
-
 output "service_role_arn" {
   description = "ECS Service role ARN"
   value       = join("", aws_iam_role.ecs_service.*.arn)
@@ -48,9 +38,19 @@ output "task_role_id" {
   value       = join("", aws_iam_role.ecs_task.*.unique_id)
 }
 
-output "service_security_group_id" {
+output "security_group_id" {
+  value       = module.security_group.id
   description = "Security Group ID of the ECS task"
-  value       = join("", aws_security_group.ecs_service.*.id)
+}
+
+output "security_group_arn" {
+  value       = module.security_group.arn
+  description = "Security Group ARN of the ECS task"
+}
+
+output "security_group_name" {
+  value       = module.security_group.name
+  description = "Security Group name of the ECS task"
 }
 
 output "task_definition_family" {
