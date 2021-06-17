@@ -36,7 +36,7 @@ module "exec_label" {
 resource "aws_ecs_task_definition" "default" {
   count                    = local.enabled && var.task_definition == null ? 1 : 0
   family                   = module.this.id
-  container_definitions    = var.container_definition_json
+  container_definitions    = nonsensitive(var.container_definition_json)
   requires_compatibilities = [var.launch_type]
   network_mode             = var.network_mode
   cpu                      = var.task_cpu
