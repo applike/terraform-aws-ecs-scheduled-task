@@ -10,12 +10,12 @@ output "ecs_exec_role_policy_name" {
 
 output "service_name" {
   description = "ECS Service name"
-  value       = try(aws_ecs_service.default[0].name)
+  value       = try(aws_cloudwatch_event_rule.default[0].name)
 }
 
 output "service_arn" {
   description = "ECS Service ARN"
-  value       = try(aws_ecs_service.default[0].id)
+  value       = try(aws_cloudwatch_event_rule.default[0].id)
 }
 
 output "service_role_arn" {
